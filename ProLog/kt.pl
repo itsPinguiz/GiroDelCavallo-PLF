@@ -18,12 +18,12 @@ update_board(Board, (X, Y), Move, NewBoard) :-
     nth0(X, NewBoard, UpdatedRow, RestRows).
 
 % Warnsdorff's Rule: ordina le mosse in base all'accessibilità
-sort_moves(_, [], []).
-sort_moves(N, [Move|Moves], [SortedMove|SortedMoves]) :-
-    findall((NX, NY), (knight_move(Move, (NX, NY)), valid_move(N, Board, (NX, NY))), NextMoves),
+sort_moves(_, _, [], []).
+sort_moves(N, Board, [(X, Y)|Moves], SortedMoves) :-
+    findall((NX, NY), (knight_move((X, Y), (NX, NY)), valid_move(N, Board, (NX, NY))), NextMoves),
     length(NextMoves, Accessibility),
-    sort_moves(N, Moves, SortedMoves),
-    insert_sorted((Accessibility, Move), SortedMoves, SortedMove).
+    sort_moves(N, Board, Moves, RestSortedMoves),
+    insert_sorted((Accessibility, (X, Y)), RestSortedMoves, SortedMoves).
 
 insert_sorted(X, [], [X]).
 insert_sorted((A1, M1), [(A2, M2)|Rest], [(A1, M1), (A2, M2)|Rest]) :- A1 =< A2.
@@ -35,7 +35,7 @@ knight_tour(N, Board, (X, Y), Move, FinalBoard) :-
     (   Move =:= N * N
     ->  FinalBoard = UpdatedBoard
     ;   findall((NX, NY), (knight_move((X, Y), (NX, NY)), valid_move(N, UpdatedBoard, (NX, NY))), Moves),
-        sort_moves(N, Moves, SortedMoves),
+        sort_moves(N, UpdatedBoard, Moves, SortedMoves),
         member((_, NextMove), SortedMoves),
         knight_tour(N, UpdatedBoard, NextMove, Move + 1, FinalBoard)
     ).
