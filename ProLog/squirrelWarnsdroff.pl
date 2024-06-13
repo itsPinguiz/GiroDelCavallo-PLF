@@ -1,76 +1,76 @@
-% Movimento del cavaliere
-knight_move((X, Y), (NX, NY)) :-
+% Movimento del cavallo
+mossa_cavallo((X, Y), (NX, NY)) :-
     member((DX, DY), [(2, 1), (1, 2), (-1, 2), (-2, 1), (-2, -1), (-1, -2), (1, -2), (2, -1)]),
     NX is X + DX,
     NY is Y + DY.
 
 % Controlla se una posizione è valida sulla scacchiera
-valid_move(N, Board, (X, Y)) :-
+mossa_valida(N, Scacchiera, (X, Y)) :-
     X >= 0, X < N, Y >= 0, Y < N,
-    nth0(X, Board, Row),
-    nth0(Y, Row, -1).
+    nth0(X, Scacchiera, Riga),
+    nth0(Y, Riga, -1).
 
 % Aggiorna la scacchiera con la nuova mossa
-update_board(Board, (X, Y), Move, NewBoard) :-
-    nth0(X, Board, Row, RestRows),
-    nth0(Y, Row, -1, NewRow),
-    nth0(Y, UpdatedRow, Move, NewRow),
-    nth0(X, NewBoard, UpdatedRow, RestRows).
+aggiorna_scacchiera(Scacchiera, (X, Y), Mossa, NuovaScacchiera) :-
+    nth0(X, Scacchiera, Riga, RestoRighe),
+    nth0(Y, Riga, -1, NuovaRiga),
+    nth0(Y, RigaAggiornata, Mossa, NuovaRiga),
+    nth0(X, NuovaScacchiera, RigaAggiornata, RestoRighe).
 
 % Calcola l'accessibilità di una casella
-accessibility(N, Board, (X, Y), Degree) :-
-    findall((NX, NY), (knight_move((X, Y), (NX, NY)), valid_move(N, Board, (NX, NY))), Moves),
-    length(Moves, Degree).
+accessibilita(N, Scacchiera, (X, Y), Grado) :-
+    findall((NX, NY), (mossa_cavallo((X, Y), (NX, NY)), mossa_valida(N, Scacchiera, (NX, NY))), Mosse),
+    length(Mosse, Grado).
 
 % Ordina le mosse in base all'accessibilità
-sort_moves(N, Board, Moves, SortedMoves) :-
-    maplist(accessibility_with_position(N, Board), Moves, MovesWithAccessibility),
-    sort(1, @=<, MovesWithAccessibility, SortedMovesWithAccessibility),
-    pairs_values(SortedMovesWithAccessibility, SortedMoves).
+ordina_mosse(N, Scacchiera, Mosse, MosseOrdinate) :-
+    maplist(accessibilita_con_posizione(N, Scacchiera), Mosse, MosseConAccessibilita),
+    sort(1, @=<, MosseConAccessibilita, MosseOrdinateConAccessibilita),
+    pairs_values(MosseOrdinateConAccessibilita, MosseOrdinate).
 
-accessibility_with_position(N, Board, Pos, Degree-Pos) :-
-    accessibility(N, Board, Pos, Degree).
+accessibilita_con_posizione(N, Scacchiera, Pos, Grado-Pos) :-
+    accessibilita(N, Scacchiera, Pos, Grado).
 
-% Risolvi il problema del tour del cavaliere
-knight_tour(N, Board, (X, Y), Move, FinalBoard) :-
-    update_board(Board, (X, Y), Move, UpdatedBoard),
-    (   Move =:= N * N
-    ->  FinalBoard = UpdatedBoard
-    ;   findall((NX, NY), (knight_move((X, Y), (NX, NY)), valid_move(N, UpdatedBoard, (NX, NY))), Moves),
-        sort_moves(N, UpdatedBoard, Moves, SortedMoves),
-        member(NextMove, SortedMoves),
-        knight_tour(N, UpdatedBoard, NextMove, Move + 1, FinalBoard)
+% Risolvi il problema del giro del cavallo
+giro_cavallo(N, Scacchiera, (X, Y), Mossa, ScacchieraFinale) :-
+    aggiorna_scacchiera(Scacchiera, (X, Y), Mossa, ScacchieraAggiornata),
+    (   Mossa =:= N * N
+    ->  ScacchieraFinale = ScacchieraAggiornata
+    ;   findall((NX, NY), (mossa_cavallo((X, Y), (NX, NY)), mossa_valida(N, ScacchieraAggiornata, (NX, NY))), Mosse),
+        ordina_mosse(N, ScacchieraAggiornata, Mosse, MosseOrdinate),
+        member(ProssimaMossa, MosseOrdinate),
+        giro_cavallo(N, ScacchieraAggiornata, ProssimaMossa, Mossa + 1, ScacchieraFinale)
     ).
 
 % Inizializza la scacchiera
-initialize_board(N, Board) :-
-    length(Board, N),
-    maplist(length_(N), Board),
-    maplist(maplist(=(-1)), Board).
+inizializza_scacchiera(N, Scacchiera) :-
+    length(Scacchiera, N),
+    maplist(lunghezza_(N), Scacchiera),
+    maplist(maplist(=(-1)), Scacchiera).
 
-length_(N, L) :- length(L, N).
+lunghezza_(N, L) :- length(L, N).
 
 % Stampa la scacchiera
-print_board(Board) :-
-    maplist(print_row, Board),
+stampa_scacchiera(Scacchiera) :-
+    maplist(stampa_riga, Scacchiera),
     nl.
 
-print_row(Row) :-
-    maplist(format('~|~t~d~2+ '), Row),
+stampa_riga(Riga) :-
+    maplist(format('~|~t~d~2+ '), Riga),
     nl.
 
-% Esegui il tour del cavaliere
-knights_tour(N, StartX, StartY) :-
-    initialize_board(N, Board),
-    (   knight_tour(N, Board, (StartX, StartY), 1, FinalBoard)
-    ->  print_board(FinalBoard)
+% Esegui il giro del cavallo
+giro_del_cavallo(N, StartX, StartY) :-
+    inizializza_scacchiera(N, Scacchiera),
+    (   giro_cavallo(N, Scacchiera, (StartX, StartY), 1, ScacchieraFinale)
+    ->  stampa_scacchiera(ScacchieraFinale)
     ;   write('Soluzione non trovata.'), nl
     ).
 
-% Funzione principale per iniziare il tour del cavaliere
+% Funzione principale per iniziare il giro del cavallo
 main :-
     write('Inserisci la dimensione della scacchiera: '),
     read(N),
-    write('Inserisci la posizione di partenza del cavaliere (X, Y): '),
+    write('Inserisci la posizione di partenza del cavallo (X, Y): '),
     read((StartX, StartY)),
-    knights_tour(N, StartX, StartY).
+    giro_del_cavallo(N, StartX, StartY).
