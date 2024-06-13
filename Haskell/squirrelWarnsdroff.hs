@@ -1,7 +1,7 @@
 {- Programma Haskell per risolvere il problema del giro del cavallo usando l'algoritmo di Warnsdorff-Squirrel. -}
 
 import Data.List (sortBy)
--- La libreria Data.List è necessaria per utilizzare la funzione sortBy che ordina una lista in base a un criterio specifico.
+-- La libreria Data.List e' necessaria per utilizzare la funzione sortBy che ordina una lista in base a un criterio specifico.
 
 import Data.Ord (comparing)
 -- La libreria Data.Ord e' necessaria per utilizzare la funzione comparing che crea un criterio di ordinamento basato su una funzione di proiezione.
@@ -10,10 +10,10 @@ import Data.Maybe (listToMaybe)
 -- La libreria Data.Maybe e' utilizzata per la funzione listToMaybe che converte una lista in un Maybe, prendendo il primo elemento della lista se esiste.
 
 import Data.IORef (IORef, newIORef, readIORef, writeIORef)
--- La libreria Data.IORef è utilizzata per creare e manipolare riferimenti mutabili (IORef) necessari per gestire lo stato mutabile nel programma.
+-- La libreria Data.IORef e' utilizzata per creare e manipolare riferimenti mutabili (IORef) necessari per gestire lo stato mutabile nel programma.
 
 import Text.Read (readMaybe)
--- La libreria Text.Read è necessaria per utilizzare la funzione readMaybe che tenta di leggere un valore da una stringa e restituisce Maybe.
+-- La libreria Text.Read e' necessaria per utilizzare la funzione readMaybe che tenta di leggere un valore da una stringa e restituisce Maybe.
 
 type Posizione = (Int, Int)
 type Scacchiera = [[Int]]
@@ -29,7 +29,11 @@ mosseCavallo = [(2, 1), (1, 2), (-1, 2), (-2, 1), (-2, -1), (-1, -2), (1, -2), (
 mossaValida :: Int -> Scacchiera -> Posizione -> Bool
 mossaValida dimensione scacchiera (x, y) = x >= 0 && x < dimensione && y >= 0 && y < dimensione && (scacchiera !! x !! y) == -1
 
+<<<<<<< Updated upstream
 {- La funzione calcolaAccessibilita calcola il numero di mosse valide successive da una data posizione:
+=======
+{- La funzione calcolaAccessibilita' calcola il numero di mosse valide successive da una data posizione:
+>>>>>>> Stashed changes
 - il primo argomento e' la dimensione della scacchiera;
 - il secondo argomento e' la scacchiera;
 - il terzo argomento e' la posizione da cui calcolare l'accessibilita'. -}
@@ -112,7 +116,7 @@ algoritmoWarnsdorffSquirrel dimensione scacchiera posizione mossa rif = do
             Just soluzione -> return (Just soluzione)
             Nothing -> tentaMossa resto scacchieraCorrente
 
-{- La funzione leggiDimensioneScacchiera legge la dimensione della scacchiera dall'input e verifica la validità:
+{- La funzione leggiDimensioneScacchiera legge la dimensione della scacchiera dall'input e verifica la validita':
 - restituisce un intero che rappresenta la dimensione della scacchiera. -}
 leggiDimensioneScacchiera :: IO Int
 leggiDimensioneScacchiera = do
@@ -124,7 +128,7 @@ leggiDimensioneScacchiera = do
                 putStrLn "Non esiste una soluzione per scacchiere di dimensioni inferiori a 5."
                 leggiDimensioneScacchiera
             | dimensione > 112 -> do
-                putStrLn "Con questo algoritmo non è possibile risolvere il problema per scacchiere di dimensioni superiori a 112."
+                putStrLn "Con questo algoritmo non e' possibile risolvere il problema per scacchiere di dimensioni superiori a 112."
                 leggiDimensioneScacchiera
             | otherwise -> return dimensione
         Nothing -> do
