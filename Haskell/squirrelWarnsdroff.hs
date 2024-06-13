@@ -29,12 +29,12 @@ mosseCavallo = [(2, 1), (1, 2), (-1, 2), (-2, 1), (-2, -1), (-1, -2), (1, -2), (
 mossaValida :: Int -> Scacchiera -> Posizione -> Bool
 mossaValida dimensione scacchiera (x, y) = x >= 0 && x < dimensione && y >= 0 && y < dimensione && (scacchiera !! x !! y) == -1
 
-{- La funzione calcolaAccessibilità calcola il numero di mosse valide successive da una data posizione:
+{- La funzione calcolaAccessibilita calcola il numero di mosse valide successive da una data posizione:
 - il primo argomento è la dimensione della scacchiera;
 - il secondo argomento è la scacchiera;
-- il terzo argomento è la posizione da cui calcolare l'accessibilità. -}
-calcolaAccessibilità :: Int -> Scacchiera -> Posizione -> Int
-calcolaAccessibilità dimensione scacchiera (x, y) = length $ filter (mossaValida dimensione scacchiera) [(x + dx, y + dy) | (dx, dy) <- mosseCavallo]
+- il terzo argomento è la posizione da cui calcolare l'accessibilita. -}
+calcolaAccessibilita :: Int -> Scacchiera -> Posizione -> Int
+calcolaAccessibilita dimensione scacchiera (x, y) = length $ filter (mossaValida dimensione scacchiera) [(x + dx, y + dy) | (dx, dy) <- mosseCavallo]
 
 {- La funzione ordinaMosse ordina le mosse in base all'accessibilita' e alla distanza dal centro:
 - il primo argomento e' la dimensione della scacchiera;
