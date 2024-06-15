@@ -22,12 +22,12 @@ L'implementazione in Haskell utilizza una struttura dati bidimensionale (lista d
 
 1. Clona il repository:
    ```bash
-   git clone https://github.com/yourusername/giro-del-cavallo.git
-   cd giro-del-cavallo
+   git clone https://github.com/yourusername/GiroDelCavallo-PLF.git
+   cd GiroDelCavallo-PLF
    ```
 2. Compila il programma Haskell:
    ```bash
-   ghc -o giro_cavallo haskell/giro_cavallo.hs
+   ghc -o giro_cavallo Haskell/squirrelWarnsdroff.hs
    ```
 3. Esegui il programma compilato:
    ```bash
@@ -44,13 +44,13 @@ L'implementazione in Prolog utilizza fatti e regole per rappresentare i moviment
 
 1. Clona il repository:
    ```bash
-   git clone https://github.com/yourusername/giro-del-cavallo.git
-   cd giro-del-cavallo
+   git clone https://github.com/yourusername/GiroDelCavallo-PLF.git
+   cd GiroDelCavallo-PLF
    ```
 2. Carica il programma Prolog:
    ```bash
    swipl
-   ?- consult('prolog/giro_cavallo.pl').
+   ?- consult('squirrelWarnsdroff.pl ').
    ```
 3. Esegui il programma:
    ```bash
@@ -63,11 +63,11 @@ L'implementazione in Prolog utilizza fatti e regole per rappresentare i moviment
 Il repository è organizzato come segue:
 
 ```bash
-giro-del-cavallo/
+GiroDelCavallo-PLF/
 │
-├── haskell/
-│   └── giro_cavallo.hs      # Implementazione Haskell
+├── Haskell/
+│   └── squirrelWarnsdroff.hs.    # Implementazione Haskell
 │
-└── prolog/
-    └── giro_cavallo.pl      # Implementazione Prolog
+└── Prolog/
+    └── squirrelWarnsdroff.pl      # Implementazione Prolog
 ```
