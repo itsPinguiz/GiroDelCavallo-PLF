@@ -20,75 +20,100 @@ import System.Timeout (timeout)
 
 -- Coordinate del cavallo
 type Posizione = (Int, Int)
--- Scacchiera e tiene conto delle mosse che compie il cavallo
+-- Scacchiera che contiene le mosse che compie il cavallo
 type Scacchiera = [[Int]]
 
 -- Movimenti del cavallo
 mosseCavallo :: [Posizione]
 mosseCavallo = [(2, 1), (1, 2), (-1, 2), (-2, 1), (-2, -1), (-1, -2), (1, -2), (2, -1)]
+main :: IO ()
+main = do
+    dimensione <- leggiDimensioneScacchiera
+    posizioneIniziale <- leggiPosizione dimensione
+    putStrLn "Attendere la soluzione..."
+    risultato <- timeout (120 * 1000000) (risolviGiroCavallo dimensione posizioneIniziale)
+    case risultato of
+        Just (Just soluzione) -> stampaScacchiera soluzione
+        Just Nothing -> putStrLn "Soluzione non trovata."
+        Nothing -> putStrLn "Tempo scaduto. Non e' stata trovata una soluzione entro il tempo limite."
+
+{- La funzione leggiDimensioneScacchiera legge la dimensione della scacchiera dall'input e verifica la validita':
+    - restituisce un intero che rappresenta la dimensione della scacchiera. -}
+
+leggiDimensioneScacchiera :: IO Int
+leggiDimensioneScacchiera = do
+    putStrLn "Inserisci la dimensione della scacchiera (intero compreso tra 5 e 112):"
+    input <- getLine
+    case readMaybe input of
+        Just dimensione 
+            | dimensione < 5 -> do
+                putStrLn "Non esiste una soluzione per scacchiere di dimensioni inferiori a 5."
+                leggiDimensioneScacchiera
+            | dimensione > 112 -> do
+                putStrLn "Con questo algoritmo non e' possibile risolvere il problema per scacchiere di dimensioni superiori a 112."
+                leggiDimensioneScacchiera
+            | otherwise -> return dimensione
+        Nothing -> do
+            putStrLn "Dimensione non valida. Inserisci un numero intero."
+            leggiDimensioneScacchiera
+
+{- La funzione leggiPosizione legge una posizione dall'input e verifica la validità rispetto alla dimensione della scacchiera:
+    - l'unico argomento e' la dimensione della scacchiera 
+    - restituisce una coppia di interi che rappresenta la posizione. -}
+
+leggiPosizione :: Int -> IO (Int, Int)
+leggiPosizione dimensione = do
+    putStrLn $ "Inserisci la posizione di partenza del cavaliere in formato (X,Y), (X e Y interi compresi tra 0 e " ++ show (dimensione - 1) ++ "):"
+    input <- getLine
+    case reads input of
+        [(pos, "")] -> return pos
+        _ -> do
+            putStrLn "Input non valido. Inserisci di nuovo (esempio: (3,3)):"
+            leggiPosizione dimensione
+
+{- La funzione inizializzaScacchiera crea una scacchiera NxN inizializzata a -1:
+    - il primo argomento e' la dimensione della scacchiera. -}
+
+inizializzaScacchiera :: Int -> Scacchiera
+inizializzaScacchiera dimensione = replicate dimensione (replicate dimensione (-1))
 
 {- La funzione mossaValida verifica se una posizione e' valida:
-- il primo argomento e' la dimensione della scacchiera;
-- il secondo argomento e' la scacchiera;
-- il terzo argomento e' la posizione da verificare. -}
+    - il primo argomento e' la dimensione della scacchiera;
+    - il secondo argomento e' la scacchiera;
+    - il terzo argomento e' la posizione da verificare. -}
 
 mossaValida :: Int -> Scacchiera -> Posizione -> Bool
 mossaValida dimensione scacchiera (x, y) = x >= 0 && x < dimensione && y >= 0 && y < dimensione && (scacchiera !! x !! y) == -1
 
 {- La funzione calcolaAccessibilita calcola il numero di mosse valide successive da una data posizione:
-- il primo argomento e' la dimensione della scacchiera;
-- il secondo argomento e' la scacchiera;
-- il terzo argomento e' la posizione da cui calcolare l'accessibilita. -}
+    - il primo argomento e' la dimensione della scacchiera;
+    - il secondo argomento e' la scacchiera;
+    - il terzo argomento e' la posizione da cui calcolare l'accessibilita. -}
 
 calcolaAccessibilita :: Int -> Scacchiera -> Posizione -> Int
 calcolaAccessibilita dimensione scacchiera (x, y) = length $ filter (mossaValida dimensione scacchiera) [(x + dx, y + dy) | (dx, dy) <- mosseCavallo]
 
 {- La funzione ordinaMosse ordina le mosse in base all'accessibilita' e alla distanza dal centro:
-- il primo argomento e' la dimensione della scacchiera;
-- il secondo argomento e' la scacchiera;
-- il terzo argomento e' la lista delle posizioni da ordinare. -}
+    - il primo argomento e' la dimensione della scacchiera;
+    - il secondo argomento e' la scacchiera;
+    - il terzo argomento e' la lista delle posizioni da ordinare. -}
 
 ordinaMosse :: Int -> Scacchiera -> [Posizione] -> [(Int, Posizione)]
 ordinaMosse dimensione scacchiera mosse = sortBy (comparing fst) $ map (\pos -> (calcolaAccessibilita dimensione scacchiera pos, pos)) mosse
 
 {- La funzione aggiornaScacchiera aggiorna la scacchiera con la nuova mossa:
-- il primo argomento e' la scacchiera;
-- il secondo argomento e' la posizione della mossa;
-- il terzo argomento e' il numero della mossa corrente. -}
+    - il primo argomento e' la scacchiera;
+    - il secondo argomento e' la posizione della mossa;
+    - il terzo argomento e' il numero della mossa corrente. -}
 
 aggiornaScacchiera :: Scacchiera -> Posizione -> Int -> Scacchiera
 aggiornaScacchiera scacchiera (x, y) mossa = take x scacchiera ++
                                 [take y (scacchiera !! x) ++ [mossa] ++ drop (y + 1) (scacchiera !! x)] ++
                                 drop (x + 1) scacchiera
 
-{- La funzione inizializzaScacchiera crea una scacchiera NxN inizializzata a -1:
-- il primo argomento e' la dimensione della scacchiera. -}
-
-inizializzaScacchiera :: Int -> Scacchiera
-inizializzaScacchiera dimensione = replicate dimensione (replicate dimensione (-1))
-
-{- La funzione stampaScacchiera stampa la scacchiera:
-- l'unico argomento e' la scacchiera da stampare. -}
-
-stampaScacchiera :: Scacchiera -> IO ()
-stampaScacchiera scacchiera = mapM_ (putStrLn . unwords . map (pad . show)) scacchiera
-  where pad s = replicate (3 - length s) ' ' ++ s
-
-{- La funzione leggiPosizione legge una posizione dall'input:
-- restituisce una coppia di interi che rappresenta la posizione. -}
-
-leggiPosizione :: IO (Int, Int)
-leggiPosizione = do
-    input <- getLine
-    case reads input of
-        [(pos, "")] -> return pos
-        _ -> do
-            putStrLn "Input non valido. Inserisci di nuovo (esempio: (3,3)):"
-            leggiPosizione
-
 {- La funzione risolviGiroCavallo risolve il problema del giro del cavallo usando l'algoritmo di Warnsdorff-Squirrel:
-- il primo argomento e' la dimensione della scacchiera;
-- il secondo argomento e' la posizione di partenza del cavaliere. -}
+    - il primo argomento e' la dimensione della scacchiera;
+    - il secondo argomento e' la posizione di partenza del cavaliere. -}
 
 risolviGiroCavallo :: Int -> Posizione -> IO (Maybe Scacchiera)
 risolviGiroCavallo dimensione partenza = do
@@ -97,11 +122,11 @@ risolviGiroCavallo dimensione partenza = do
     return risultato
 
 {- La funzione algoritmoWarnsdorffSquirrel implementa l'algoritmo di Warnsdorff-Squirrel per risolvere il giro del cavallo:
-- il primo argomento e' la dimensione della scacchiera;
-- il secondo argomento e' la scacchiera corrente;
-- il terzo argomento e' la posizione corrente del cavallo;
-- il quarto argomento e' il numero della mossa corrente;
-- il quinto argomento e' un riferimento IORef contenente lo stato delle caselle mancanti e la scacchiera.-}
+    - il primo argomento e' la dimensione della scacchiera;
+    - il secondo argomento e' la scacchiera corrente;
+    - il terzo argomento e' la posizione corrente del cavallo;
+    - il quarto argomento e' il numero della mossa corrente;
+    - il quinto argomento e' un riferimento IORef contenente lo stato delle caselle mancanti e la scacchiera.-}
 
 algoritmoWarnsdorffSquirrel :: Int -> Scacchiera -> Posizione -> Int -> IORef (Int, Scacchiera) -> IO (Maybe Scacchiera)
 algoritmoWarnsdorffSquirrel dimensione scacchiera posizione mossa rif = do
@@ -125,34 +150,10 @@ algoritmoWarnsdorffSquirrel dimensione scacchiera posizione mossa rif = do
             Just soluzione -> return (Just soluzione)
             Nothing -> tentaMossa resto scacchieraCorrente
 
-{- La funzione leggiDimensioneScacchiera legge la dimensione della scacchiera dall'input e verifica la validita':
-- restituisce un intero che rappresenta la dimensione della scacchiera. -}
+{- La funzione stampaScacchiera stampa la scacchiera:
+    - l'unico argomento e' la scacchiera da stampare. -}
 
-leggiDimensioneScacchiera :: IO Int
-leggiDimensioneScacchiera = do
-    putStrLn "Inserisci la dimensione della scacchiera (intero compreso tra 5 e 112):"
-    input <- getLine
-    case readMaybe input of
-        Just dimensione 
-            | dimensione < 5 -> do
-                putStrLn "Non esiste una soluzione per scacchiere di dimensioni inferiori a 5."
-                leggiDimensioneScacchiera
-            | dimensione > 112 -> do
-                putStrLn "Con questo algoritmo non e' possibile risolvere il problema per scacchiere di dimensioni superiori a 112."
-                leggiDimensioneScacchiera
-            | otherwise -> return dimensione
-        Nothing -> do
-            putStrLn "Dimensione non valida. Inserisci un numero intero."
-            leggiDimensioneScacchiera
+stampaScacchiera :: Scacchiera -> IO ()
+stampaScacchiera scacchiera = mapM_ (putStrLn . unwords . map (pad . show)) scacchiera
+  where pad s = replicate (3 - length s) ' ' ++ s
 
-main :: IO ()
-main = do
-    dimensione <- leggiDimensioneScacchiera
-    putStrLn $ "Inserisci la posizione di partenza del cavaliere in formato (X, Y), (X e Y interi compresi tra 0 e " ++ show (dimensione - 1) ++ "):"
-    posizioneIniziale <- leggiPosizione
-    putStrLn "Attendere la soluzione..."
-    risultato <- timeout (120 * 1000000) (risolviGiroCavallo dimensione posizioneIniziale)
-    case risultato of
-        Just (Just soluzione) -> stampaScacchiera soluzione
-        Just Nothing -> putStrLn "Soluzione non trovata."
-        Nothing -> putStrLn "Tempo scaduto. Non e' stata trovata una soluzione entro il tempo limite."
