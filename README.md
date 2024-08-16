@@ -71,3 +71,44 @@ GiroDelCavallo-PLF/
 └── Prolog/
     └── squirrelWarnsdroff.pl      # Implementazione Prolog
 ```
+
+## Correzzioni segnalate dal Professore
+
+### Lingua e Impaginazione:
+Bisogna mettere "italian" per evitare cose del tipo "min-imizza" [-1].
+
+### Specifica del Problema:
+L'intero N può essere non positivo? Che significa "in tempi ragionevoli"? [-2].
+
+### Analisi del Problema:
+Perché N diventa prima naturale e poi \ge 1? (x, y) che limiti ha?
+Nella matrice i numeri devono essere distinti?
+Da nessuna parte viene scritto che il cavallo si muove a L [-4].
+
+### Progettazione dell'Algoritmo:
+Bisogna spiegare come funzionano l'algoritmo di Warnsdorff
+e la strategia di Squirrel e se il primo trova sempre
+la soluzione (quando esiste) come l'algoritmo di backtracking [2].
+
+"Ripetizione del processo ricorsivo" è un ossimoro [-1].
+
+### Qualitá del Software:
+#### Leggibile (coerenza stilistica)?
+In Haskell prima di main sarebbe il caso di lasciare una linea vuota [-1].
+
+leggiDimensioneScacchiera non è una funzione ma un'azione [-1].
+
+Presenza di linee lunghe che andando a capo rovinano l'indentazione [-1].
+
+In Prolog si chiamano predicati, non funzioni [-1].
+
+Misto di identificatori in italiano e in inglese (StartX) [-1].
+
+
+#### Funzionante (limitazioni/validazione/usabilità)?
+In Prolog dopo "main." e "Inserisci la dimensione della scacchiera (intero compreso tra 5 e 112):" compare
+"uncaught exception: error(existence_error(procedure,read_line_to_string/2),leggi_dimensione_scacchiera/0)"
+[-4].
+
+### Note:
+Per Haskell dovete consegnarmi solo il .hs.
