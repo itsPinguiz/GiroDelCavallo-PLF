@@ -5,7 +5,11 @@ main :-
     leggi_posizione(Dimensione, InizioX, InizioY),
     statistics(runtime, [Inizio|_]),  % Inizia a monitorare il tempo di esecuzione
     write('Attendere la soluzione...'), nl,
-    (   risolvi(Dimensione, (InizioX, InizioY), Inizio, ScacchieraFinale)
+    (   catch(
+            risolvi(Dimensione, (InizioX, InizioY), Inizio, ScacchieraFinale),
+            error(resource_error(stack), _),
+            (write('Errore: Memoria esaurita durante il calcolo. Aumenta lo stack size se possibile.'), halt)
+        )
     ->  stampa_scacchiera(ScacchieraFinale)
     ;   write('Soluzione non trovata.'), nl
     ).
@@ -68,17 +72,28 @@ leggi_dimensione_scacchiera(Dimensione) :-
    - InizioX, InizioY: coordinate della posizione iniziale (X, Y).
 */
 leggi_posizione(N, InizioX, InizioY) :-
+    repeat,
     write('Inserisci la posizione di partenza del cavallo (X,Y)'),
-    format(', (X e Y interi compresi tra 0 e ~d): ', [N-1]),
-    read((X, Y)),
-    (   integer(X), integer(Y), X >= 0, X < N, Y >= 0, Y < N ->
-        (InizioX = X, InizioY = Y)
-    ;   (integer(X), integer(Y) ->
-            Max is N - 1,
-            write('Posizione non valida. Deve essere compresa tra 0 e '), write(Max), write('.')
-        ;   write('Dato inserito non valido. Inserisci una coppia di interi.')
-        ), nl, leggi_posizione(N, InizioX, InizioY)
-    ).
+    format(' (X e Y interi compresi tra 0 e ~d): ', [N-1]),
+    catch(read_term(user_input, Ingresso, []), _, fallimento),
+    (   analizza_input(Ingresso, N, InizioX, InizioY)
+    ->  !
+    ;   fallimento).
+
+/* Funzione di fallimento chiamata in caso di errore durante la lettura */
+fallimento :-
+    write('Input non valido o errore di sintassi. Riprova.\n'),
+    fail.
+
+/* Analizza l'input e verifica che sia nel formato corretto (X,Y).
+   - Input: termine letto dall'utente.
+   - N: dimensione della scacchiera.
+   - InizioX, InizioY: coordinate della posizione iniziale (X, Y).
+*/
+analizza_input((X,Y), N, X, Y) :-
+    integer(X), integer(Y), X >= 0, X < N, Y >= 0, Y < N.
+analizza_input(_, _, _, _) :-
+    fail.  % Fallisce se l'input non è nel formato corretto
 
 /* Inizializza la scacchiera con valori di default (-1).
    - N: dimensione della scacchiera.
