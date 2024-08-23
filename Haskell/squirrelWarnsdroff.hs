@@ -1,22 +1,29 @@
-{- Programma Haskell per risolvere il problema del giro del cavallo usando l'algoritmo di Warnsdorff-Squirrel. -}
+{- Programma Haskell per risolvere il problema del giro del cavallo usando 
+l'algoritmo di Warnsdorff-Squirrel. -}
 
 import Data.List (sortBy)
--- La libreria Data.List e' necessaria per utilizzare la funzione sortBy che ordina una lista in base a un criterio specifico.
+{- La libreria Data.List e' necessaria per utilizzare la funzione sortBy che ordina 
+una lista in base a un criterio specifico.-}
 
 import Data.Ord (comparing)
--- La libreria Data.Ord e' necessaria per utilizzare la funzione comparing che crea un criterio di ordinamento basato su una funzione di proiezione.
+{- La libreria Data.Ord e' necessaria per utilizzare la funzione comparing che crea 
+un criterio di ordinamento basato su una funzione di proiezione. -}
 
 import Data.Maybe (listToMaybe)
--- La libreria Data.Maybe e' utilizzata per la funzione listToMaybe che converte una lista in un Maybe, prendendo il primo elemento della lista se esiste.
+{- La libreria Data.Maybe e' utilizzata per la funzione listToMaybe che converte una
+ lista in un Maybe, prendendo il primo elemento della lista se esiste. -}
 
 import Data.IORef (IORef, newIORef, readIORef, writeIORef)
--- La libreria Data.IORef e' utilizzata per creare e manipolare riferimenti mutabili (IORef) necessari per gestire lo stato mutabile nel programma.
+{- La libreria Data.IORef e' utilizzata per creare e manipolare riferimenti mutabili 
+(IORef) necessari per gestire lo stato mutabile nel programma.-}
 
 import Text.Read (readMaybe)
--- La libreria Text.Read e' necessaria per utilizzare la funzione readMaybe che tenta di leggere un valore da una stringa e restituisce Maybe.
+{- La libreria Text.Read e' necessaria per utilizzare la funzione readMaybe che tenta 
+di leggere un valore da una stringa e restituisce Maybe.-}
 
 import System.Timeout (timeout)
--- La libreria System.Timeout  e' necessaria per utilizzare la funzione timeout che termina l'esecuzione a seguito di un tempo prestabilito.
+{- La libreria System.Timeout  e' necessaria per utilizzare la funzione timeout che 
+termina l'esecuzione a seguito di un tempo prestabilito.-}
 
 -- Coordinate del cavallo
 type Posizione = (Int, Int)
@@ -26,6 +33,7 @@ type Scacchiera = [[Int]]
 -- Movimenti del cavallo
 mosseCavallo :: [Posizione]
 mosseCavallo = [(2, 1), (1, 2), (-1, 2), (-2, 1), (-2, -1), (-1, -2), (1, -2), (2, -1)]
+
 main :: IO ()
 main = do
     dimensione <- leggiDimensioneScacchiera
@@ -37,7 +45,8 @@ main = do
         Just Nothing -> putStrLn "Soluzione non trovata."
         Nothing -> putStrLn "Tempo scaduto. Non e' stata trovata una soluzione entro il tempo limite."
 
-{- La funzione leggiDimensioneScacchiera legge la dimensione della scacchiera dall'input e verifica la validita':
+{- La funzione leggiDimensioneScacchiera legge la dimensione della scacchiera dall'input 
+e verifica la validita':
     - restituisce un intero che rappresenta la dimensione della scacchiera. -}
 
 leggiDimensioneScacchiera :: IO Int
@@ -45,7 +54,7 @@ leggiDimensioneScacchiera = do
     putStrLn "Inserisci la dimensione della scacchiera (intero compreso tra 5 e 112):"
     input <- getLine
     case readMaybe input of
-        Just dimensione 
+        Just dimensione
             | dimensione < 5 -> do
                 putStrLn "Non esiste una soluzione per scacchiere di dimensioni inferiori a 5."
                 leggiDimensioneScacchiera
@@ -57,13 +66,15 @@ leggiDimensioneScacchiera = do
             putStrLn "Dimensione non valida. Inserisci un numero intero."
             leggiDimensioneScacchiera
 
-{- La funzione leggiPosizione legge una posizione dall'input e verifica la validità rispetto alla dimensione della scacchiera:
+{- La funzione leggiPosizione legge una posizione dall'input e verifica la validità 
+rispetto alla dimensione della scacchiera:
     - l'unico argomento e' la dimensione della scacchiera 
     - restituisce una coppia di interi che rappresenta la posizione. -}
 
 leggiPosizione :: Int -> IO (Int, Int)
 leggiPosizione dimensione = do
-    putStrLn $ "Inserisci la posizione di partenza del cavaliere in formato (X,Y), (X e Y interi compresi tra 0 e " ++ show (dimensione - 1) ++ "):"
+    putStrLn "Inserisci la posizione di partenza del cavaliere in formato (X,Y)"
+    putStrLn $ "(X e Y interi compresi tra 0 e " ++ show (dimensione - 1) ++ "):"
     input <- getLine
     case reads input of
         [(pos, "")] -> return pos
@@ -83,7 +94,10 @@ inizializzaScacchiera dimensione = replicate dimensione (replicate dimensione (-
     - il terzo argomento e' la posizione da verificare. -}
 
 mossaValida :: Int -> Scacchiera -> Posizione -> Bool
-mossaValida dimensione scacchiera (x, y) = x >= 0 && x < dimensione && y >= 0 && y < dimensione && (scacchiera !! x !! y) == -1
+mossaValida dimensione scacchiera (x, y) =
+    x >= 0 && x < dimensione &&
+    y >= 0 && y < dimensione &&
+    (scacchiera !! x !! y) == -1
 
 {- La funzione calcolaAccessibilita calcola il numero di mosse valide successive da una data posizione:
     - il primo argomento e' la dimensione della scacchiera;
@@ -91,7 +105,8 @@ mossaValida dimensione scacchiera (x, y) = x >= 0 && x < dimensione && y >= 0 &&
     - il terzo argomento e' la posizione da cui calcolare l'accessibilita. -}
 
 calcolaAccessibilita :: Int -> Scacchiera -> Posizione -> Int
-calcolaAccessibilita dimensione scacchiera (x, y) = length $ filter (mossaValida dimensione scacchiera) [(x + dx, y + dy) | (dx, dy) <- mosseCavallo]
+calcolaAccessibilita dimensione scacchiera (x, y) =
+    length $ filter (mossaValida dimensione scacchiera) [(x + dx, y + dy) | (dx, dy) <- mosseCavallo]
 
 {- La funzione ordinaMosse ordina le mosse in base all'accessibilita' e alla distanza dal centro:
     - il primo argomento e' la dimensione della scacchiera;
@@ -99,7 +114,11 @@ calcolaAccessibilita dimensione scacchiera (x, y) = length $ filter (mossaValida
     - il terzo argomento e' la lista delle posizioni da ordinare. -}
 
 ordinaMosse :: Int -> Scacchiera -> [Posizione] -> [(Int, Posizione)]
-ordinaMosse dimensione scacchiera mosse = sortBy (comparing fst) $ map (\pos -> (calcolaAccessibilita dimensione scacchiera pos, pos)) mosse
+ordinaMosse dimensione scacchiera mosse =
+    sortBy (comparing fst) $
+    map (\pos ->
+        (calcolaAccessibilita dimensione scacchiera pos, pos)
+    ) mosse
 
 {- La funzione aggiornaScacchiera aggiorna la scacchiera con la nuova mossa:
     - il primo argomento e' la scacchiera;
@@ -107,9 +126,13 @@ ordinaMosse dimensione scacchiera mosse = sortBy (comparing fst) $ map (\pos -> 
     - il terzo argomento e' il numero della mossa corrente. -}
 
 aggiornaScacchiera :: Scacchiera -> Posizione -> Int -> Scacchiera
-aggiornaScacchiera scacchiera (x, y) mossa = take x scacchiera ++
-                                [take y (scacchiera !! x) ++ [mossa] ++ drop (y + 1) (scacchiera !! x)] ++
-                                drop (x + 1) scacchiera
+aggiornaScacchiera scacchiera (x, y) mossa =
+    take x scacchiera ++
+    [take y (scacchiera !! x) ++
+     [mossa] ++
+     drop (y + 1) (scacchiera !! x)] ++
+    drop (x + 1) scacchiera
+
 
 {- La funzione risolviGiroCavallo risolve il problema del giro del cavallo usando l'algoritmo di Warnsdorff-Squirrel:
     - il primo argomento e' la dimensione della scacchiera;
@@ -118,8 +141,7 @@ aggiornaScacchiera scacchiera (x, y) mossa = take x scacchiera ++
 risolviGiroCavallo :: Int -> Posizione -> IO (Maybe Scacchiera)
 risolviGiroCavallo dimensione partenza = do
     rif <- newIORef (dimensione * dimensione, inizializzaScacchiera dimensione)
-    risultato <- algoritmoWarnsdorffSquirrel dimensione (inizializzaScacchiera dimensione) partenza 1 rif
-    return risultato
+    algoritmoWarnsdorffSquirrel dimensione (inizializzaScacchiera dimensione) partenza 1 rif
 
 {- La funzione algoritmoWarnsdorffSquirrel implementa l'algoritmo di Warnsdorff-Squirrel per risolvere il giro del cavallo:
     - il primo argomento e' la dimensione della scacchiera;
@@ -128,12 +150,13 @@ risolviGiroCavallo dimensione partenza = do
     - il quarto argomento e' il numero della mossa corrente;
     - il quinto argomento e' un riferimento IORef contenente lo stato delle caselle mancanti e la scacchiera.-}
 
-algoritmoWarnsdorffSquirrel :: Int -> Scacchiera -> Posizione -> Int -> IORef (Int, Scacchiera) -> IO (Maybe Scacchiera)
+algoritmoWarnsdorffSquirrel :: Int -> Scacchiera -> Posizione 
+                            -> Int -> IORef (Int, Scacchiera) -> IO (Maybe Scacchiera)
 algoritmoWarnsdorffSquirrel dimensione scacchiera posizione mossa rif = do
     let scacchieraAggiornata = aggiornaScacchiera scacchiera posizione mossa
     let caselleMancanti = dimensione * dimensione - mossa
     writeIORef rif (caselleMancanti, scacchieraAggiornata)
-    if mossa == dimensione * dimensione 
+    if mossa == dimensione * dimensione
         then return (Just scacchieraAggiornata)
         else do
             let prossimeMosse = filter (mossaValida dimensione scacchieraAggiornata) [(fst posizione + dx, snd posizione + dy) | (dx, dy) <- mosseCavallo]

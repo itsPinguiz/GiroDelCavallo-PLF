@@ -1,136 +1,199 @@
-:- use_module(library(time)). /* per impostare un limite di tempo per l'esecuzione del programma. */
-
-/* Programma Prolog per risolvere il problema del giro del cavallo usando l'algoritmo di Warnsdorff-Squirrel. */
+/* Programma Prolog per risolvere il problema del giro del cavallo usando l'algoritmo di Warnsdorff-Squirrel con ricorsione in coda. */
 
 main :-
     leggi_dimensione_scacchiera(Dimensione),
-    leggi_posizione(Dimensione, StartX, StartY),
+    leggi_posizione(Dimensione, InizioX, InizioY),
+    statistics(runtime, [Inizio|_]),  % Inizia a monitorare il tempo di esecuzione
     write('Attendere la soluzione...'), nl,
-    (   catch(call_with_time_limit(120, risolvi_giro_cavallo(Dimensione, (StartX, StartY), ScacchieraFinale)),
-              time_limit_exceeded,
-              (write('Tempo scaduto. Non è stata trovata una soluzione entro il tempo limite.'), nl, fail))
+    (   risolvi(Dimensione, (InizioX, InizioY), Inizio, ScacchieraFinale)
     ->  stampa_scacchiera(ScacchieraFinale)
     ;   write('Soluzione non trovata.'), nl
     ).
 
-/* Funzione per leggere e validare la dimensione della scacchiera dall'input:
-   - chiede all'utente di inserire un numero intero compreso tra 5 e 112;
-   - valida l'input e richiede nuovamente se l'input è non valido o fuori dal range specificato;
-   - restituisce la dimensione valida della scacchiera. */
+/* Risolve il problema del giro del cavallo con monitoraggio del tempo.
+   - N: dimensione della scacchiera.
+   - PosizioneIniziale: posizione iniziale del cavallo (InizioX, InizioY).
+   - TempoIniziale: tempo di inizio esecuzione.
+   - ScacchieraFinale: la scacchiera finale con il percorso del cavallo.
+*/
+risolvi(N, PosizioneIniziale, TempoIniziale, ScacchieraFinale) :-
+    inizializza_scacchiera(N, Scacchiera),
+    algoritmo_warnsdorff(N, Scacchiera, PosizioneIniziale, 1, TempoIniziale, ScacchieraFinale).
+
+/* Implementa l'algoritmo Warnsdorff-Squirrel con controllo del tempo e ricorsione in coda.
+   - N: dimensione della scacchiera.
+   - Scacchiera: scacchiera corrente.
+   - (X, Y): posizione corrente del cavallo.
+   - Mossa: numero della mossa corrente.
+   - TempoIniziale: tempo di inizio esecuzione.
+   - ScacchieraFinale: la scacchiera finale con il percorso completato.
+*/
+algoritmo_warnsdorff(N, Scacchiera, (X, Y), Mossa, TempoIniziale, ScacchieraFinale) :-
+    statistics(runtime, [TempoAttuale|_]),  % Ottiene il tempo corrente
+    TempoPassato is TempoAttuale - TempoIniziale,
+    (TempoPassato > 120000 ->
+        format('Tempo limite superato: ~w ms\n', [TempoPassato]),
+        halt  % Interrompe l'esecuzione se supera 120 secondi (120000 ms)
+    ; aggiorna_scacchiera(Scacchiera, (X, Y), Mossa, ScacchieraAggiornata),
+        (   Mossa =:= N * N  % Caso base: tutte le celle sono state visitate
+        ->  ScacchieraFinale = ScacchieraAggiornata
+        ;   findall((NX, NY), 
+                    (mosse_cavallo((X, Y), (NX, NY)), 
+                     mossa_valida(N, ScacchieraAggiornata, (NX, NY))
+                    ), 
+                    Mosse),
+            ordina_mosse(N, ScacchieraAggiornata, Mosse, MosseOrdinate),
+            member(ProssimaMossa, MosseOrdinate),
+            algoritmo_warnsdorff(N, ScacchieraAggiornata, ProssimaMossa,
+                                 Mossa + 1, TempoIniziale, ScacchieraFinale)
+        )
+    ).
+
+/* Legge e valida la dimensione della scacchiera.
+   - Dimensione: dimensione della scacchiera (N).
+*/
 leggi_dimensione_scacchiera(Dimensione) :-
     write('Inserisci la dimensione della scacchiera (intero compreso tra 5 e 112): '),
-    read_line_to_string(user_input, Input),
-    (   catch(number_string(N, Input), _, fail),
-        integer(N), N >= 5, N =< 112 ->
-        Dimensione = N
-    ;   (catch(number_string(N, Input), _, false), integer(N) ->
+    read(Ingresso),
+    (   integer(Ingresso), Ingresso >= 5, Ingresso =< 112 ->
+        Dimensione = Ingresso
+    ;   (integer(Ingresso) ->
             write('Dimensione non valida. Deve essere compresa tra 5 e 112.')
-        ;   write('Input non valido. Inserisci un numero intero.')
+        ;   write('Dato inserito non valido. Inserisci un numero intero.')
         ), nl, leggi_dimensione_scacchiera(Dimensione)
     ).
 
-/* Funzione per leggere e validare la posizione di partenza dall'input:
-   - il primo argomento è la dimensione N della scacchiera;
-   - il secondo argomento è la variabile StartX che conterrà la coordinata X della posizione iniziale;
-   - il terzo argomento è la variabile StartY che conterrà la coordinata Y della posizione iniziale;
-   - richiede all'utente di inserire una posizione valida. */
-leggi_posizione(N, StartX, StartY) :-
-    format('Inserisci la posizione di partenza del cavallo (X,Y), (X e Y interi compresi tra 0 e ~d): ', [N-1]),
-    read_line_to_string(user_input, Input),
-    (   catch(term_string((X, Y), Input), _, fail),
-        integer(X), integer(Y), X >= 0, X < N, Y >= 0, Y < N ->
-        (StartX = X, StartY = Y)
-    ;   (catch(term_string((X, Y), Input), _, false), integer(X), integer(Y) ->
+/* Legge e valida la posizione iniziale del cavallo.
+   - N: dimensione della scacchiera.
+   - InizioX, InizioY: coordinate della posizione iniziale (X, Y).
+*/
+leggi_posizione(N, InizioX, InizioY) :-
+    write('Inserisci la posizione di partenza del cavallo (X,Y)'),
+    format(', (X e Y interi compresi tra 0 e ~d): ', [N-1]),
+    read((X, Y)),
+    (   integer(X), integer(Y), X >= 0, X < N, Y >= 0, Y < N ->
+        (InizioX = X, InizioY = Y)
+    ;   (integer(X), integer(Y) ->
             Max is N - 1,
             write('Posizione non valida. Deve essere compresa tra 0 e '), write(Max), write('.')
-        ;   write('Input non valido. Inserisci una coppia di interi.')
-        ), nl, leggi_posizione(N, StartX, StartY)
+        ;   write('Dato inserito non valido. Inserisci una coppia di interi.')
+        ), nl, leggi_posizione(N, InizioX, InizioY)
     ).
 
-/* Inizializza la scacchiera:
-   - il primo argomento è la dimensione N della scacchiera;
-   - il secondo argomento è la scacchiera inizializzata con -1. */
+/* Inizializza la scacchiera con valori di default (-1).
+   - N: dimensione della scacchiera.
+   - Scacchiera: scacchiera inizializzata.
+*/
 inizializza_scacchiera(N, Scacchiera) :-
-    length(Scacchiera, N), % Crea una lista di N elementi (le righe della scacchiera)
-    maplist({N}/[Riga]>>length(Riga, N), Scacchiera), % Imposta la lunghezza di ciascuna riga a N
-    maplist(maplist(=(-1)), Scacchiera). % Inizializza ogni cella della scacchiera con -1
+    length(Scacchiera, N), % Crea una lista di N righe
+    maplist(crea_riga(N), Scacchiera).
 
-/* Movimento del cavallo: 
-   - prende come argomento una posizione (X, Y);
-   - restituisce una nuova posizione (NX, NY) risultante da un movimento a "L". */
-mosse_cavallo((X, Y), (NX, NY)) :-
-    member((DX, DY), [(2, 1), (1, 2), (-1, 2), (-2, 1), (-2, -1), (-1, -2), (1, -2), (2, -1)]),
-    NX is X + DX,
-    NY is Y + DY.
+/* Crea una riga della scacchiera con valori di default (-1).
+   - N: dimensione della riga.
+   - Riga: riga inizializzata con valori -1.
+*/
+crea_riga(N, Riga) :-
+    length(Riga, N), % Crea una riga di lunghezza N
+    maplist(=( -1), Riga). % Inizializza tutte le celle a -1
 
-/* Controlla se una posizione è valida sulla scacchiera:
-   - il primo argomento è la dimensione N della scacchiera;
-   - il secondo argomento è la scacchiera stessa;
-   - il terzo argomento è la posizione (X, Y) da verificare. */
+/* Genera le mosse possibili del cavallo a partire da una posizione.
+   - (X, Y): posizione corrente del cavallo.
+   - (NuovoX, NuovoY): nuova posizione generata dal movimento del cavallo.
+*/
+mosse_cavallo((X, Y), (NuovoX, NuovoY)) :-
+    member((DeltaX, DeltaY), [(2, 1), (1, 2), (-1, 2), (-2, 1),
+                              (-2, -1), (-1, -2), (1, -2), (2, -1)]),
+    NuovoX is X + DeltaX,
+    NuovoY is Y + DeltaY,
+    NuovoX >= 0,
+    NuovoY >= 0.
+
+/* Controlla se una mossa è valida (ossia se è dentro i confini della scacchiera e la cella non è stata visitata).
+   - N: dimensione della scacchiera.
+   - Scacchiera: scacchiera corrente.
+   - (X, Y): posizione da verificare.
+*/
 mossa_valida(N, Scacchiera, (X, Y)) :-
     X >= 0, X < N, Y >= 0, Y < N,
     nth0(X, Scacchiera, Riga),
     nth0(Y, Riga, -1).
 
-/* Calcola l'accessibilità di una posizione e la associa alla posizione stessa:
-   - il primo argomento è la dimensione N della scacchiera;
-   - il secondo argomento è la scacchiera attuale;
-   - il terzo argomento è la posizione (X, Y);
-   - il quarto argomento è una coppia Grado-Pos, dove Grado è il numero di mosse possibili da (X, Y) e Pos è la posizione stessa. */
+/* Calcola l'accessibilità di una posizione (numero di mosse valide possibili).
+   - N: dimensione della scacchiera.
+   - Scacchiera: scacchiera corrente.
+   - (X, Y): posizione da analizzare.
+   - Grado-(X, Y): coppia grado di accessibilità e posizione.
+*/
 calcola_accessibilita_con_posizione(N, Scacchiera, (X, Y), Grado-(X, Y)) :-
-    findall((NX, NY), (mosse_cavallo((X, Y), (NX, NY)), mossa_valida(N, Scacchiera, (NX, NY))), Mosse),
+    findall((NuovoX, NuovoY), (mosse_cavallo((X, Y), (NuovoX, NuovoY)), 
+             mossa_valida(N, Scacchiera, (NuovoX, NuovoY))), Mosse),
     length(Mosse, Grado).
 
-/* Ordina le mosse in base all'accessibilità:
-   - il primo argomento è la dimensione N della scacchiera;
-   - il secondo argomento è la scacchiera attuale;
-   - il terzo argomento è la lista delle mosse possibili;
-   - il quarto argomento è la lista delle mosse ordinate per accessibilità. */
+/* Ordina le mosse in base all'accessibilità (secondo la regola di Warnsdorff).
+   - N: dimensione della scacchiera.
+   - Scacchiera: scacchiera corrente.
+   - Mosse: lista delle mosse possibili.
+   - MosseOrdinate: lista delle mosse ordinate per accessibilità.
+*/
 ordina_mosse(N, Scacchiera, Mosse, MosseOrdinate) :-
     maplist(calcola_accessibilita_con_posizione(N, Scacchiera), Mosse, MosseConAccessibilita),
-    sort(1, @=<, MosseConAccessibilita, MosseOrdinateConAccessibilita),
-    pairs_values(MosseOrdinateConAccessibilita, MosseOrdinate).
+    keysort(MosseConAccessibilita, MosseOrdinateConAccessibilita),
+    estrai_valori(MosseOrdinateConAccessibilita, MosseOrdinate).
 
-/* Aggiorna la scacchiera con la nuova mossa:
-   - il primo argomento è la scacchiera attuale;
-   - il secondo argomento è la posizione (X, Y) della mossa;
-   - il terzo argomento è il numero della mossa;
-   - il quarto argomento è la nuova scacchiera aggiornata. */
+/* Estrae i valori da una lista di coppie chiave-valore.
+   - Lista: lista di coppie chiave-valore.
+   - Valori: lista dei valori estratti.
+*/
+estrai_valori([], []).
+estrai_valori([_-Val|Resto], [Val|ValoriResto]) :-
+    estrai_valori(Resto, ValoriResto).
+
+/* Aggiorna la scacchiera con una nuova mossa.
+   - Scacchiera: scacchiera corrente.
+   - (X, Y): posizione della mossa.
+   - Mossa: numero della mossa corrente.
+   - NuovaScacchiera: scacchiera aggiornata con la nuova mossa.
+*/
 aggiorna_scacchiera(Scacchiera, (X, Y), Mossa, NuovaScacchiera) :-
-    nth0(X, Scacchiera, Riga, RestoRighe),
-    nth0(Y, Riga, -1, NuovaRiga),
-    nth0(Y, RigaAggiornata, Mossa, NuovaRiga),
-    nth0(X, NuovaScacchiera, RigaAggiornata, RestoRighe).
+    (X >= 0, Y >= 0 ->  
+        nth0(X, Scacchiera, Riga),  
+        aggiorna_lista(Riga, Y, Mossa, NuovaRiga),  
+        aggiorna_lista(Scacchiera, X, NuovaRiga, NuovaScacchiera)
+    ;   throw(error(domain_error(not_less_than_zero, (X, Y)), _))).
 
-/* Esegui il giro del cavallo:
-   - il primo argomento è la dimensione N della scacchiera;
-   - il secondo argomento è la posizione iniziale (StartX, StartY);
-   - il terzo argomento è la scacchiera finale. */
-risolvi_giro_cavallo(N, (StartX, StartY), ScacchieraFinale) :-
-    inizializza_scacchiera(N, Scacchiera),
-    algoritmo_warnsdorff_squirrel(N, Scacchiera, (StartX, StartY), 1, ScacchieraFinale).
+/* Aggiorna una lista con un nuovo elemento in una posizione specifica.
+   - Lista: lista corrente.
+   - Indice: posizione da aggiornare.
+   - Elem: nuovo elemento da inserire.
+   - NuovaLista: lista aggiornata.
+*/
+aggiorna_lista([_|Resto], 0, Elem, [Elem|Resto]) :- !.
+aggiorna_lista([Testa|Resto], Indice, Elem, [Testa|NuovoResto]) :-
+    (Indice > 0 ->  
+        NuovoIndice is Indice - 1,
+        aggiorna_lista(Resto, NuovoIndice, Elem, NuovoResto)
+    ;   throw(error(domain_error(not_less_than_zero, Indice), _))).
 
-/* Risolvi il problema del giro del cavallo:
-   - il primo argomento è la dimensione N della scacchiera;
-   - il secondo argomento è la scacchiera attuale;
-   - il terzo argomento è la posizione corrente (X, Y);
-   - il quarto argomento è il numero della mossa corrente;
-   - il quinto argomento è la scacchiera finale. */
-algoritmo_warnsdorff_squirrel(N, Scacchiera, (X, Y), Mossa, ScacchieraFinale) :-
-    aggiorna_scacchiera(Scacchiera, (X, Y), Mossa, ScacchieraAggiornata),
-    (   Mossa =:= N * N
-    ->  ScacchieraFinale = ScacchieraAggiornata
-    ;   findall((NX, NY), (mosse_cavallo((X, Y), (NX, NY)), mossa_valida(N, ScacchieraAggiornata, (NX, NY))), Mosse),
-        ordina_mosse(N, ScacchieraAggiornata, Mosse, MosseOrdinate),
-        member(ProssimaMossa, MosseOrdinate),
-        algoritmo_warnsdorff_squirrel(N, ScacchieraAggiornata, ProssimaMossa, Mossa + 1, ScacchieraFinale)
-    ).
-
-/* Stampa la scacchiera:
-   - il primo argomento è la scacchiera da stampare. */
+/* Stampa la scacchiera.
+   - Scacchiera: scacchiera da stampare.
+*/
 stampa_scacchiera(Scacchiera) :-
-    maplist([Riga]>>(
-        maplist(format('~|~t~d~2+ '), Riga),
-        nl
-    ), Scacchiera),
-    nl.
+    stampa_righe(Scacchiera).
+
+/* Stampa tutte le righe della scacchiera.
+   - Scacchiera: scacchiera da stampare riga per riga.
+*/
+stampa_righe([]).
+stampa_righe([Riga|Resto]) :-
+    stampa_riga(Riga),
+    nl,
+    stampa_righe(Resto).
+
+/* Stampa una singola riga della scacchiera.
+   - Riga: riga da stampare.
+*/
+stampa_riga([]).
+stampa_riga([Elemento|Resto]) :-
+    format('~d ', [Elemento]),  % Stampa l'elemento con uno spazio
+    stampa_riga(Resto).
+
