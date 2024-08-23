@@ -49,8 +49,7 @@ L'implementazione in Prolog utilizza fatti e regole per rappresentare i moviment
    ```
 2. Carica il programma Prolog:
    ```bash
-   swipl
-   ?- consult('squirrelWarnsdroff.pl ').
+   gprolog --consult-file squirrelWarnsdroff.pl
    ```
 3. Esegui il programma:
    ```bash
