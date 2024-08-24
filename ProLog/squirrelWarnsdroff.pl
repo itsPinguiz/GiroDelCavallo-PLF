@@ -48,6 +48,7 @@ algoritmo_warnsdorff(Dimensione, Scacchiera, (X, Y), Mossa, TempoInizio, Scacchi
                                  Mossa + 1, TempoInizio, ScacchieraFinale)
         )
     ).
+
 /* Legge e valida la dimensione della scacchiera. 
 */
 leggi_dimensione_scacchiera(Dimensione) :-
@@ -107,22 +108,21 @@ mosse_cavallo((X, Y), (NuovoX, NuovoY)) :-
     NuovoX >= 0,
     NuovoY >= 0.
 
-/* Controlla se una mossa è valida (ossia se è dentro i confini della scacchiera e la cella non è  
-   stata visitata). 
+/* Controlla se una mossa e' valida (ossia se e' dentro i confini della scacchiera e la cella non  e' stata visitata). 
 */
 mossa_valida(N, Scacchiera, (X, Y)) :-
     X >= 0, X < N, Y >= 0, Y < N,
     nth0(X, Scacchiera, Riga),
     nth0(Y, Riga, -1).
 
-/* Calcola l'accessibilità di una posizione (numero di mosse valide possibili). 
+/* Calcola l'accessibilita' di una posizione (numero di mosse valide possibili). 
 */
 calcola_accessibilita_con_posizione(N, Scacchiera, (X, Y), Grado-(X, Y)) :-
     findall((NuovoX, NuovoY), (mosse_cavallo((X, Y), (NuovoX, NuovoY)), 
              mossa_valida(N, Scacchiera, (NuovoX, NuovoY))), Mosse),
     length(Mosse, Grado).
 
-/* Ordina le mosse in base all'accessibilità (secondo la regola di Warnsdorff). 
+/* Ordina le mosse in base all'accessibilita' (secondo la regola di Warnsdorff). 
 */
 ordina_mosse(N, Scacchiera, Mosse, MosseOrdinate) :-
     maplist(calcola_accessibilita_con_posizione(N, Scacchiera), Mosse, MosseConAccessibilita),
