@@ -75,27 +75,27 @@ GiroDelCavallo-PLF/
 
 ### Lingua e Impaginazione:
 
-- [ ] Bisogna mettere "italian" per evitare cose del tipo "min-imizza" [-1].
+- [X] Bisogna mettere "italian" per evitare cose del tipo "min-imizza" [-1].
 
 ### Specifica del Problema:
 
-- [ ] L'intero N può essere non positivo? Che significa "in tempi ragionevoli"? [-2].
+- [X] L'intero N può essere non positivo? Che significa "in tempi ragionevoli"? [-2].
 
 ### Analisi del Problema:
 
-- [ ] Perché N diventa prima naturale e poi \ge 1? (x, y) che limiti ha?
+- [X] Perché N diventa prima naturale e poi \ge 1? (x, y) che limiti ha?
 
-- [ ] Nella matrice i numeri devono essere distinti?
+- [X] Nella matrice i numeri devono essere distinti?
 
-- [ ] Da nessuna parte viene scritto che il cavallo si muove a L [-4].
+- [X] Da nessuna parte viene scritto che il cavallo si muove a L [-4].
 
 ### Progettazione dell'Algoritmo:
 
-- [ ] Bisogna spiegare come funzionano l'algoritmo di Warnsdorff
+- [X] Bisogna spiegare come funzionano l'algoritmo di Warnsdorff
 e la strategia di Squirrel e se il primo trova sempre
 la soluzione (quando esiste) come l'algoritmo di backtracking [2].
 
-- [ ] "Ripetizione del processo ricorsivo" è un ossimoro [-1].
+- [X] "Ripetizione del processo ricorsivo" è un ossimoro [-1].
 
 ### Qualitá del Software:
 #### Leggibile (coerenza stilistica)?
