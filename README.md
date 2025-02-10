@@ -126,9 +126,9 @@ Per Haskell dovete consegnarmi solo il .hs.
 
 - [X] Numeri naturali distinti "compresi tra 1 ed N^2" [-1].
 
-- [X]Che bisogno c'è di usare coordinate che partono da (0, 0) anziché da (1, 1) [-1].
+- [X] Che bisogno c'è di usare coordinate che partono da (0, 0) anziché da (1, 1) [-1].
 
-- [X]Nella definizione generale di "una" matrice quadrata N x N non è affatto detto che i valori contenuti siano compresi tra 1 ed N^2, ciò vale per "la" matrice del problema [-1].
+- [X] Nella definizione generale di "una" matrice quadrata N x N non è affatto detto che i valori contenuti siano compresi tra 1 ed N^2, ciò vale per "la" matrice del problema [-1].
 
 #### Progettazione dell'Algoritmo:
 
