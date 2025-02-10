@@ -72,96 +72,100 @@ GiroDelCavallo-PLF/
 ```
 
 ## Correzzioni segnalate dal Professore 
-### 16 Giugno
-#### Lingua e Impaginazione:
+**VOTO FINALE PROGETTO:** 22
+<details>
+  <summary>16 Giugno</summary>
+   Lingua e Impaginazione:
+   
+   - [X] Bisogna mettere "italian" per evitare cose del tipo "min-imizza" [-1].
+   
+   Specifica del Problema:
+   
+   - [X] L'intero N può essere non positivo? Che significa "in tempi ragionevoli"? [-2].
+   
+   Analisi del Problema:
+   
+   - [X] Perché N diventa prima naturale e poi \ge 1? (x, y) che limiti ha?
+   
+   - [X] Nella matrice i numeri devono essere distinti?
+   
+   - [X] Da nessuna parte viene scritto che il cavallo si muove a L [-4].
+   
+   Progettazione dell'Algoritmo:
+   
+   - [X] Bisogna spiegare come funzionano l'algoritmo di Warnsdorff e la strategia di Squirrel e se il primo trova sempre la soluzione (quando esiste) come l'algoritmo di backtracking [2].
+   
+   - [X] "Ripetizione del processo ricorsivo" è un ossimoro [-1].
+   
+   Qualitá del Software:
+   
+   Leggibile (coerenza stilistica)?
+   - [X] In Haskell prima di main sarebbe il caso di lasciare una linea vuota [-1].
+   
+   - [X] leggiDimensioneScacchiera non è una funzione ma un'azione [-1].
+   
+   - [X] Presenza di linee lunghe che andando a capo rovinano l'indentazione [-1].
+   
+   - [X] In Prolog si chiamano predicati, non funzioni [-1].
+   
+   - [X] Misto di identificatori in italiano e in inglese (StartX) [-1].
+   
+   
+   Funzionante (limitazioni/validazione/usabilità)?
+   - [X] In Prolog dopo "main." e "Inserisci la dimensione della scacchiera (intero compreso tra 5 e 112):" compare "uncaught exception: error(existence_error(procedure,read_line_to_string/2),leggi_dimensione_scacchiera/0)" [-4].
+   
+   Note:
+   Per Haskell dovete consegnarmi solo il .hs.
+</details>
 
-- [X] Bisogna mettere "italian" per evitare cose del tipo "min-imizza" [-1].
+<details>
+  <summary>28 Agosto</summary>
+   Specifica del Problema:
+   
+   - [X] Il tempo di esecuzione di un programma può dipendere anche dall'hardware utilizzato, solo la complessità computazionale non dipende da fattori esterni al programma [-2].
+         
+   Analisi del Problema:
+   
+   - [X] Numeri naturali distinti "compresi tra 1 ed N^2" [-1].
+   
+   - [X] Che bisogno c'è di usare coordinate che partono da (0, 0) anziché da (1, 1) [-1].
+   
+   - [X] Nella definizione generale di "una" matrice quadrata N x N non è affatto detto che i valori contenuti siano compresi tra 1 ed N^2, ciò vale per "la" matrice del problema [-1].
+   
+   Progettazione dell'Algoritmo:
+   
+   - [X] Nella progettazione dell'algoritmo non ci devono essere riferimenti ai linguaggi di implementazione (e comunque Haskell ha gli array) [-1].
+   
+   - [X] Il passo 4 dovrebbe essere qualcosa del tipo "Se il giro viene completato con successo entro 2 minuti, stampa della scacchiera sotto forma di tabella con i numeri delle mosse del cavallo in ordine crescente, altrimenti stampa di un messaggio ..." [-1].
+   
+   Qualitá del Software:
+   
+   Leggibile (coerenza stilistica)?
+   - [X] Presenza di linee lunghe che andando a capo rovinano l'indentazione [-1].
+   
+   - [X] Evitare di scrivere che è una funzione/azione o un predicato non è accettabile [-1].
+   
+   - [X] Seguendo l'ordine top-down inizializzaScacchiera, mossaValida, calcolaAccessibilita, ordinaMosse e aggiornaScacchiera vanno definite dopo risolviGiroCavallo [-1].
+   
+   
+   Funzionante (limitazioni/validazione/usabilità)?
+   - [X] In Prolog la tabella non viene stampata con le colonne allineate  (nella sezione di testing i risultati vanno riportati fedelmente) [-1].
+   
+  Note:
+   Progetto riconsegnato [-4].
+</details>
 
-#### Specifica del Problema:
-
-- [X] L'intero N può essere non positivo? Che significa "in tempi ragionevoli"? [-2].
-
-#### Analisi del Problema:
-
-- [X] Perché N diventa prima naturale e poi \ge 1? (x, y) che limiti ha?
-
-- [X] Nella matrice i numeri devono essere distinti?
-
-- [X] Da nessuna parte viene scritto che il cavallo si muove a L [-4].
-
-#### Progettazione dell'Algoritmo:
-
-- [X] Bisogna spiegare come funzionano l'algoritmo di Warnsdorff
-e la strategia di Squirrel e se il primo trova sempre
-la soluzione (quando esiste) come l'algoritmo di backtracking [2].
-
-- [X] "Ripetizione del processo ricorsivo" è un ossimoro [-1].
-
-#### Qualitá del Software:
-##### Leggibile (coerenza stilistica)?
-- [X] In Haskell prima di main sarebbe il caso di lasciare una linea vuota [-1].
-
-- [X] leggiDimensioneScacchiera non è una funzione ma un'azione [-1].
-
-- [X] Presenza di linee lunghe che andando a capo rovinano l'indentazione [-1].
-
-- [X] In Prolog si chiamano predicati, non funzioni [-1].
-
-- [X] Misto di identificatori in italiano e in inglese (StartX) [-1].
-
-
-##### Funzionante (limitazioni/validazione/usabilità)?
-- [X] In Prolog dopo "main." e "Inserisci la dimensione della scacchiera (intero compreso tra 5 e 112):" compare
-"uncaught exception: error(existence_error(procedure,read_line_to_string/2),leggi_dimensione_scacchiera/0)"
-[-4].
-
-#### Note:
-Per Haskell dovete consegnarmi solo il .hs.
-
-### 28 Agosto
-#### Specifica del Problema:
-
-- [X] Il tempo di esecuzione di un programma può dipendere anche dall'hardware utilizzato, solo la complessità computazionale non dipende da fattori esterni al programma [-2].
-#### Analisi del Problema:
-
-- [X] Numeri naturali distinti "compresi tra 1 ed N^2" [-1].
-
-- [X] Che bisogno c'è di usare coordinate che partono da (0, 0) anziché da (1, 1) [-1].
-
-- [X] Nella definizione generale di "una" matrice quadrata N x N non è affatto detto che i valori contenuti siano compresi tra 1 ed N^2, ciò vale per "la" matrice del problema [-1].
-
-#### Progettazione dell'Algoritmo:
-
-- [X] Nella progettazione dell'algoritmo non ci devono essere riferimenti ai linguaggi di implementazione (e comunque Haskell ha gli array) [-1].
-
-- [X] Il passo 4 dovrebbe essere qualcosa del tipo "Se il giro viene completato con successo entro 2 minuti,
-stampa della scacchiera sotto forma di tabella con i numeri delle mosse del cavallo in ordine crescente,
-altrimenti stampa di un messaggio ..." [-1].
-
-#### Qualitá del Software:
-##### Leggibile (coerenza stilistica)?
-- [X] Presenza di linee lunghe che andando a capo rovinano l'indentazione [-1].
-
-- [X] Evitare di scrivere che è una funzione/azione o un predicato non è accettabile [-1].
-
-- [X] Seguendo l'ordine top-down inizializzaScacchiera, mossaValida, calcolaAccessibilita, ordinaMosse e aggiornaScacchiera vanno definite dopo risolviGiroCavallo [-1].
-
-
-##### Funzionante (limitazioni/validazione/usabilità)?
-- [X] In Prolog la tabella non viene stampata con le colonne allineate  (nella sezione di testing i risultati vanno riportati fedelmente) [-1].
-
-#### Note:
-Progetto riconsegnato [-4].
-
-### 10 Settembre
-#### Qualitá del Software:
-##### Leggibile (coerenza stilistica)?
-- [X]  leggiDimensioneScacchiera è un'azione, non una funzione [-1].
-
-- [X]  Seguendo l'ordine top-down inizializzaScacchiera, mossaValida, calcolaAccessibilita, ordinaMosse e aggiornaScacchiera vanno definite dopo risolviGiroCavallo [-1].
-
-
-#### Note:
-Progetto riconsegnato per la seconda volta [-6].
-
-## VOTO FINALE PROGETTO: 22
+<details>
+  <summary>10 Settembre</summary>
+   Qualitá del Software:
+   
+   Leggibile (coerenza stilistica)?
+   
+   - [X] leggiDimensioneScacchiera è un'azione, non una funzione [-1].
+   
+   - [X]  Seguendo l'ordine top-down inizializzaScacchiera, mossaValida, calcolaAccessibilita, ordinaMosse e aggiornaScacchiera vanno definite dopo risolviGiroCavallo [-1].
+   
+   
+   Note:
+   Progetto riconsegnato per la seconda volta [-6].
+</details>
